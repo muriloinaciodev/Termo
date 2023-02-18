@@ -7,6 +7,13 @@ attempts = 0
 testedWords = []
 win = False
 
+def removeAccented(text):
+    accents = ['À', 'Á', 'É', 'Í', 'Ó', 'Ú', 'Â', 'Ê', 'Î', 'Ô', 'Û', 'Ã', 'Õ']
+    normal = ['A', 'A', 'E', 'I', 'O', 'U', 'A', 'E', 'I', 'O', 'U', 'A', 'O']
+    for i, accent in enumerate(accents):
+        text = text.replace(accent, normal[i])
+    return text
+
 while attempts < 6:
     #Entrada
     attempts += 1
@@ -15,8 +22,8 @@ while attempts < 6:
     system('clear')
     finalWord = ""
     for i, char in enumerate(inputWord):
-        if char in selectedWord:
-            if char == selectedWord[i]:
+        if char in removeAccented(selectedWord):
+            if char == removeAccented(selectedWord[i]):
                 finalWord += (f'\033[42m{char}\033[m')
             else:
                 finalWord += (f'\033[43m{char}\033[m')
@@ -29,7 +36,7 @@ while attempts < 6:
     for word in testedWords:
         print(f' {word}')
 
-    if selectedWord == inputWord:
+    if removeAccented(selectedWord) == inputWord:
         win = True
         break
 
