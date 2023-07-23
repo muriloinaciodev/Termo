@@ -1,4 +1,4 @@
-// Version: 1.0
+// Last Update on 23.07.2023
 // wordsElement[word[letter, ...], ...]
 wordsElements = [
     document.getElementById('word1').children,
@@ -26,7 +26,6 @@ fetch('word.json')
     .then(data => {
         selectedWord = data[0]
     })
-
 
 function rmAcentos(text){
     text = text.replace(/[áàâãä]/gi, 'a')
@@ -68,11 +67,12 @@ wordInput.addEventListener('keyup', async (e) => {
         spin.style.visibility = 'visible' //spin de carregamento show
         //verifica se palavra existe
         word = wordInput.value.toLowerCase()
-        url = url = `https://dicio-api-ten.vercel.app/v2/${word}`
+        url = `https://api.dicionario-aberto.net/word/${word}`
         response = await fetch(url)
+        data = await response.json()
         spin.style.visibility = 'hidden' //spin de carregamento hide
-        if (response["status"] == 400){
-            warning("aviso", `A palavra "${word}" não foi encontrada no dicionario dicio.`)
+        if (data.length == 0) {
+            warning("aviso", `A palavra "${word}" não foi encontrada no "Dicionario Aberto API".`)
             wordInput.value = ""
             return
         }
@@ -87,15 +87,16 @@ wordInput.addEventListener('keyup', async (e) => {
         testedWords.push(word)
 
         //var temp sem acentos
-        tSelectedWord = rmAcentos(selectedWord)
-        tWordInput    = rmAcentos(wordInput.value)
+        tSelectedWord = rmAcentos(selectedWord).toLowerCase()
+        tWordInput    = rmAcentos(wordInput.value).toLowerCase()
+        console.log(tSelectedWord, tWordInput)
 
         //verifica a cor das letras
         for (let i = 0; i < 5; i++){
             console.log(`${selectedWord} ${wordInput.value[i]}`)
 
-            if (tSelectedWord.indexOf(tWordInput[i].toLowerCase()) !== -1){
-                if (selectedWord[i] == wordInput.value[i].toLowerCase()){
+            if (tSelectedWord.indexOf(tWordInput[i]) !== -1){
+                if (tSelectedWord[i] == tWordInput[i]){
                     wordsElements[wordCursor][i].style.backgroundColor = "green"
                     wordsElements[wordCursor][i].style.borderColor = "green"
                 } else {

@@ -1,82 +1,128 @@
+<!--Last Update on 23.07.2023-->
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alterar Palavra</title>
+    <link rel="shortcut icon" href="Icon.ico" type="image/x-icon">
+    <title>Painel do Administrador</title>
     <style>
         body {
-            position: absolute;
-            background-color: #1a1a1a;
-            top: 30%;
-            left: 50%;
-            transform: translate(-50%, -30%)
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            margin: 0px;
+            padding: 0px;
+
+            width: 100vw;
+            height: 100vh;
+
+            background-color: #404040;
         }
-        section {
-            width: 300px;
-            height: 350px;
-            background-color: cyan;
-            border-radius: 20px;
-            display:flex;
-            flex-direction: column;
+        h1 {
+            font-size: 2.5em;
+        }
+        p {
+            font-size: 1.7em;
+        }
+        main {
+            background-color: #262626;
+            box-shadow: 4px 4px 4px black;
+            padding: 15px;
+            border-radius: 15px;
+            color: whitesmoke;
             font-family: monospace;
             text-align: center;
+        }
+
+        form {
+            display: grid;
+            width: 80%;
+            margin: auto;
+        }
+
+        form input {
+            font-family: monospace;
             font-size: 1.5em;
-            padding: 15px;
-        }
-        input[type="text"]{
-            width: 150px;
-            height: 50px;
-            margin: 0px;
-            padding: 0px;
-            border: 2px solid gray;
-            margin-bottom: 10px;
-            font-size:1.5em;
             text-align: center;
-        }
-        input[type="submit"]{
-            width: 154px;
-            height: 50px;
-            margin: 0px;
-            padding: 0px;
-            background-color: red;
-            border: none;
-            border-bottom: 6px solid darkred;
-            color: white;
-            font-weight: bold;
-        }
-        input[type="submit"]:active {
+            line-height: 50px;
+            padding: 0;
+            margin: 0;
+            outline: 0;
             border:none;
-            background-color: darkred;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        input[type=text] {
+            font-size: 2em;
+        }
+        input[type=submit] {
+            font-weight: bolder;
+            background-color: green;
+            color: white;
+            font-weight: bolder;
+        }
+        input[type=submit]:disabled {
+            font-weight: bolder;
+            background-color: red;
+            color: white;
+            font-weight: bolder;
+        }
+        a {
+            color: whitesmoke;
+            font-weight: bolder;
+            display: inline-block;
+            padding-top: 10px;
         }
     </style>
 </head>
 <body>
-    <section>
-    <h1>Painel Admin</h1>
-    <p>Este painel serve para alterar a palavra do termo.</p>
-    <form method="post">
-        <input type="text" name="word" autocomplete="Off" maxlength="5"> <br>
-        <input type="submit" value="Confirmar">
-    </form>
-    <?php 
+    <main>
+        <h1>Painel do <br>Administrador</h1>
+        <p>Palavra atual: <span id="currentWord">...</span></p>
+        <form method="POST">
+            <input type="text" name="word" id="inputWord" autocomplete="off" maxlength="5" placeholder="Ex.: VERBO" oninput="verifyWord();this.value = this.value.slice(0, this.maxLength).toUpperCase()">
+            <input id="btnSubmit" type="submit" value="Alterar Palavra"  title="Palavra Invalida" onclick="location.reload(true)" disabled>
+        </form>
+        <a href="index.html">Home Page</a>
+    </main>
+    <?php
         if (isset($_POST['word']) and strlen($_POST['word']) == 5){
             file_put_contents('word.json', json_encode(
                 array(strtolower($_POST['word']))
-            ));
-            echo "<p>" . $_POST['word'] . " agora é a palavra atual do Termo</p>";
-        } else {
-            echo "<p> Preencha completamente o campo de texto </p>";
-        }
-
-        ?>
-    </section>
+            )
+        );}
+    ?>
     <script>
-        input = document.querySelector('input[type="text"]')
-        input.addEventListener("input", () => {
-            input.value = input.value.toUpperCase()
-        })
+        inputWordE = document.getElementById('inputWord')
+        btnSubmitE = document.getElementById('btnSubmit')
+        currentWordE = document.getElementById('currentWord')
+
+        fetch('word.json')
+            .then(response => {return response.json()})
+            .then(data => {currentWordE.innerText = data[0].toUpperCase()})
+
+        async function verifyWord(){
+            word = inputWordE.value.toLowerCase()
+            btnSubmitE.disabled = true 
+            btnSubmitE.title = 'Palavra Invalida'
+            if (word.length != 5) { return }
+
+            // Requesição API Dicionario Aberto
+            url = `https://api.dicionario-aberto.net/word/${word}`
+            response = await fetch(url)
+            data = await response.json()
+            console.log(data)
+
+            // Verifica retorno se palavra esta no dicionario
+            if (data.length) {
+                btnSubmitE.disabled = false 
+                btnSubmitE.title = 'Palavra Valida'
+                console.log('existe')
+            }
+        }
     </script>
 </body>
 </html>
